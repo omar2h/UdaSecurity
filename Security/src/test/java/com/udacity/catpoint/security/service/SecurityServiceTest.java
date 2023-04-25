@@ -101,12 +101,21 @@ class SecurityServiceTest {
 
     // 7. If the image service identifies an image containing a cat while the system is armed-home, put the system into alarm status.
     @Test
-    public void changeSensorActivationStatus_imageServiceIdentifiesCatAndAlarmArmedHome_changeStatusToAlarm() {
+    public void processImage_imageServiceIdentifiesCatAndAlarmArmedHome_changeStatusToAlarm() {
         when(securityRepository.getArmingStatus()).thenReturn(ArmingStatus.ARMED_HOME);
         when(imageService.imageContainsCat(any(), ArgumentMatchers.anyFloat())).thenReturn(true);
         securityService.processImage(mock(BufferedImage.class));
 
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
+    }
+
+    // 8. If the image service identifies an image that does not contain a cat, change the status to no alarm as long as the sensors are not active.
+    @Test
+    public void processImage_imageServiceIdentifiesNoCatAndSensorNotActive_changeStatusToNoAlarm() {
+        when(imageService.imageContainsCat(any(), ArgumentMatchers.anyFloat())).thenReturn(false);
+        securityService.processImage(mock(BufferedImage.class));
+
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
 
     private static Stream<Arguments> differentArmingStatus() {
