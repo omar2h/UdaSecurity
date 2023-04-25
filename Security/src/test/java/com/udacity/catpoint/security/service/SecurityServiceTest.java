@@ -14,9 +14,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.awt.image.BufferedImage;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,12 +91,22 @@ class SecurityServiceTest {
     // 6. If a sensor is deactivated while already inactive, make no changes to the alarm state.
     @ParameterizedTest
     @MethodSource("differentAlarmStatus")
-    void ifSensorDeactivatedWhileInactive_noChangesToAlarmState(AlarmStatus alarmStatus) {
+    public void changeSensorActivationStatus_sensorDeactivatedWhileInactive_noChangesToAlarmState(AlarmStatus alarmStatus) {
         sensor.setActive(false);
         when(securityRepository.getAlarmStatus()).thenReturn(alarmStatus);
         securityService.changeSensorActivationStatus(sensor, false);
 
         verify(securityRepository, never()).setAlarmStatus(any(AlarmStatus.class));
+    }
+
+    // 7. If the image service identifies an image containing a cat while the system is armed-home, put the system into alarm status.
+    @Test
+    public void changeSensorActivationStatus_imageServiceIdentifiesCatAndAlarmArmedHome_changeStatusToAlarm() {
+        when(securityRepository.getArmingStatus()).thenReturn(ArmingStatus.ARMED_HOME);
+        when(imageService.imageContainsCat(any(), ArgumentMatchers.anyFloat())).thenReturn(true);
+        securityService.processImage(mock(BufferedImage.class));
+
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
     private static Stream<Arguments> differentArmingStatus() {
