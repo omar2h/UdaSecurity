@@ -144,6 +144,15 @@ class SecurityServiceTest {
         );
     }
 
+    // 11. If the system is armed-home while the camera shows a cat, set the alarm status to alarm.
+    @Test
+    public void processImage_systemArmedHomeAndCatIdentified_setAlarmStatusToAlarm() {
+        when(imageService.imageContainsCat(any(), anyFloat())).thenReturn(true);
+        when(securityRepository.getArmingStatus()).thenReturn(ArmingStatus.ARMED_HOME);
+        securityService.processImage(mock(BufferedImage.class));
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
+    }
+
     private static Stream<Arguments> differentAlarmStatus() {
         return Stream.of(
                 Arguments.of(AlarmStatus.NO_ALARM),
