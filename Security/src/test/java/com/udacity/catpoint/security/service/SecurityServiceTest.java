@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.image.BufferedImage;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -126,9 +127,18 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
 
+    // 10. If the system is armed, reset all sensors to inactive.
+    @ParameterizedTest
+    @MethodSource("differentArmingStatus")
+    public void setArmingStatus_systemArmed_resetSensors(ArmingStatus armingStatus) {
+        securityService.setArmingStatus(armingStatus);
+
+        Set<Sensor> sensors = securityService.getSensors();
+        assertFalse(sensors.stream().anyMatch(Sensor::getActive), "Expected all sensors to be inactive, but some are active.");
+    }
+
     private static Stream<Arguments> differentArmingStatus() {
         return Stream.of(
-                Arguments.of(ArmingStatus.ARMED_AWAY),
                 Arguments.of(ArmingStatus.ARMED_AWAY),
                 Arguments.of(ArmingStatus.ARMED_HOME)
         );
