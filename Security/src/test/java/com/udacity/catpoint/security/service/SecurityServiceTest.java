@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -65,6 +66,15 @@ class SecurityServiceTest {
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
         securityService.changeSensorActivationStatus(sensor,false);
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
+    }
+
+    // If alarm is active, change in sensor state should not affect the alarm state.
+    @ParameterizedTest
+    @ValueSource(booleans = {true,false})
+    public void changeSensorActivationStatus_AlarmActive_noChangeInAlarmState(Boolean sensorState) {
+        when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.ALARM);
+        securityService.changeSensorActivationStatus(sensor, sensorState);
+        verify(securityRepository, never()).setAlarmStatus(any(AlarmStatus.class));
     }
 
     private static Stream<Arguments> differentArmingStatus() {

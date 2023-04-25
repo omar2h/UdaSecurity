@@ -9,4 +9,5 @@ module Security {
     requires com.google.common;
 
     opens com.udacity.catpoint.security.data to com.google.gson;
+    opens com.udacity.catpoint.security.service to junit;
 }
