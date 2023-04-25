@@ -37,7 +37,7 @@ class SecurityServiceTest {
         securityService = new SecurityService(securityRepository, imageService);
     }
 
-    // If alarm is armed and a sensor becomes activated, put the system into pending alarm status.
+    // 1. If alarm is armed and a sensor becomes activated, put the system into pending alarm status.
     @ParameterizedTest
     @MethodSource("differentArmingStatus")
     public void changeSensorActivationStatus_alarmArmedAndSensorActivated_changedSystemIntoPendingAlarmStatus(
@@ -48,7 +48,7 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.PENDING_ALARM);
     }
 
-    // If alarm is armed and a sensor becomes activated and the system is already pending alarm, set the alarm status to alarm.
+    // 2. If alarm is armed and a sensor becomes activated and the system is already pending alarm, set the alarm status to alarm.
     @ParameterizedTest
     @MethodSource("differentArmingStatus")
     public void changeSensorActivationStatus_alarmArmedAndSensorActivatedAndSystemAlarmPending_changedSystemIntoAlarmStatus(
@@ -59,7 +59,7 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
-    // If pending alarm and all sensors are inactive, return to no alarm state.
+    // 3. If pending alarm and all sensors are inactive, return to no alarm state.
     @Test
     public void changeSensorActivationStatus_pendingAlarmAndSensorsInactive_changedSystemIntoNoAlarmStatus() {
         when(sensor.getActive()).thenReturn(true);
@@ -68,7 +68,7 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
 
-    // If alarm is active, change in sensor state should not affect the alarm state.
+    // 4. If alarm is active, change in sensor state should not affect the alarm state.
     @ParameterizedTest
     @ValueSource(booleans = {true,false})
     public void changeSensorActivationStatus_alarmActive_noChangeInAlarmState(Boolean sensorState) {
@@ -77,7 +77,7 @@ class SecurityServiceTest {
         verify(securityRepository, never()).setAlarmStatus(any(AlarmStatus.class));
     }
 
-    // If a sensor is activated while already active and the system is in pending state, change it to alarm state.
+    // 5. If a sensor is activated while already active and the system is in pending state, change it to alarm state.
     @Test
     public void changeSensorActivationStatus_sensorActivatedAlreadyActiveAndPendingAlarm_changeStatusToAlarm(){
         sensor.setActive(true);
@@ -86,10 +86,30 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
+    // 6. If a sensor is deactivated while already inactive, make no changes to the alarm state.
+    @ParameterizedTest
+    @MethodSource("differentAlarmStatus")
+    void ifSensorDeactivatedWhileInactive_noChangesToAlarmState(AlarmStatus alarmStatus) {
+        sensor.setActive(false);
+        when(securityRepository.getAlarmStatus()).thenReturn(alarmStatus);
+        securityService.changeSensorActivationStatus(sensor, false);
+
+        verify(securityRepository, never()).setAlarmStatus(any(AlarmStatus.class));
+    }
+
     private static Stream<Arguments> differentArmingStatus() {
         return Stream.of(
                 Arguments.of(ArmingStatus.ARMED_AWAY),
+                Arguments.of(ArmingStatus.ARMED_AWAY),
                 Arguments.of(ArmingStatus.ARMED_HOME)
+        );
+    }
+
+    private static Stream<Arguments> differentAlarmStatus() {
+        return Stream.of(
+                Arguments.of(AlarmStatus.NO_ALARM),
+                Arguments.of(AlarmStatus.PENDING_ALARM),
+                Arguments.of(AlarmStatus.ALARM)
         );
     }
 }
