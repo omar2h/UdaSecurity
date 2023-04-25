@@ -118,6 +118,14 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
 
+    // 9. If the system is disarmed, set the status to no alarm.
+    @Test
+    public void setArmingStatus_systemDisarmed_setNoAlarmState() {
+        securityService.setArmingStatus(ArmingStatus.DISARMED);
+
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
+    }
+
     private static Stream<Arguments> differentArmingStatus() {
         return Stream.of(
                 Arguments.of(ArmingStatus.ARMED_AWAY),
