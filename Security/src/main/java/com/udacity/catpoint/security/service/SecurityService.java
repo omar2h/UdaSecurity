@@ -24,7 +24,6 @@ public class SecurityService {
     private ImageService imageService;
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
-    private boolean isCatDetected = false;
 
     public SecurityService(SecurityRepository securityRepository, ImageService imageService) {
         this.securityRepository = securityRepository;
@@ -155,7 +154,7 @@ public class SecurityService {
      * @param currentCameraImage
      */
     public void processImage(BufferedImage currentCameraImage) {
-        isCatDetected = catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
+        setIsCatDetected(catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f)));
     }
 
     public AlarmStatus getAlarmStatus() {
@@ -183,6 +182,6 @@ public class SecurityService {
     }
 
     public void setIsCatDetected(boolean status){
-        this.isCatDetected = status;
+        securityRepository.setIsCatDetected(status);
     }
 }

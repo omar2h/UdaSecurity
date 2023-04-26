@@ -35,6 +35,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
         //load system state from prefs, or else default
         alarmStatus = AlarmStatus.valueOf(prefs.get(ALARM_STATUS, AlarmStatus.NO_ALARM.toString()));
         armingStatus = ArmingStatus.valueOf(prefs.get(ARMING_STATUS, ArmingStatus.DISARMED.toString()));
+        cat = Boolean.valueOf(prefs.get(CAT_DETECTED, String.valueOf(false)));
 
         //we've serialized our sensor objects for storage, which should be a good warning sign that
         // this is likely an impractical solution for a real system
