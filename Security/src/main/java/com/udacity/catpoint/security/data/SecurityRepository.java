@@ -1,5 +1,6 @@
 package com.udacity.catpoint.security.data;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -11,9 +12,10 @@ public interface SecurityRepository {
     void updateSensor(Sensor sensor);
     void setAlarmStatus(AlarmStatus alarmStatus);
     void setArmingStatus(ArmingStatus armingStatus);
-    Set<Sensor> getSensors();
+    Collection<Sensor> getSensors();
     AlarmStatus getAlarmStatus();
     ArmingStatus getArmingStatus();
 
-
+    void setIsCatDetected(Boolean cat);
+    boolean isCatDetected();
 }

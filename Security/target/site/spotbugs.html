@@ -69,7 +69,7 @@
 <th>Missing Classes</th></tr>
 <tr class="b">
 <td>10</td>
-<td>4</td>
+<td>5</td>
 <td>0</td>
 <td>0</td></tr></table></section><section>
 <h2><a name="Files"></a>Files</h2>
@@ -82,7 +82,7 @@
 <td>1</td></tr>
 <tr class="a">
 <td><a href="#com.udacity.catpoint.security.service.SecurityService">com.udacity.catpoint.security.service.SecurityService</a></td>
-<td>3</td></tr></table></section><a name="com.udacity.catpoint.security.data.PretendDatabaseSecurityRepositoryImpl"></a><section>
+<td>4</td></tr></table></section><a name="com.udacity.catpoint.security.data.PretendDatabaseSecurityRepositoryImpl"></a><section>
 <h3><a name="com.udacity.catpoint.security.data.PretendDatabaseSecurityRepositoryImpl"></a>com.udacity.catpoint.security.data.PretendDatabaseSecurityRepositoryImpl</h3>
 <table border="0" class="bodyTable">
 <tr class="a">
@@ -95,7 +95,7 @@
 <td>com.udacity.catpoint.security.data.PretendDatabaseSecurityRepositoryImpl.getSensors() may expose internal representation by returning PretendDatabaseSecurityRepositoryImpl.sensors</td>
 <td>MALICIOUS_CODE</td>
 <td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#EI_EXPOSE_REP">EI_EXPOSE_REP</a></td>
-<td>80</td>
+<td>90</td>
 <td>Medium</td></tr></table></section><a name="com.udacity.catpoint.security.service.SecurityService"></a><section>
 <h3><a name="com.udacity.catpoint.security.service.SecurityService"></a>com.udacity.catpoint.security.service.SecurityService</h3>
 <table border="0" class="bodyTable">
@@ -109,19 +109,25 @@
 <td>new com.udacity.catpoint.security.service.SecurityService(SecurityRepository, ImageService) may expose internal representation by storing an externally mutable object into SecurityService.securityRepository</td>
 <td>MALICIOUS_CODE</td>
 <td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#EI_EXPOSE_REP2">EI_EXPOSE_REP2</a></td>
-<td>29</td>
+<td>30</td>
 <td>Medium</td></tr>
 <tr class="a">
-<td>Switch statement found in com.udacity.catpoint.security.service.SecurityService.handleSensorActivated() where default case is missing</td>
+<td>Switch statement found in com.udacity.catpoint.security.service.SecurityService.handleSensorActivated(boolean) where default case is missing</td>
 <td>STYLE</td>
 <td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#SF_SWITCH_NO_DEFAULT">SF_SWITCH_NO_DEFAULT</a></td>
-<td>95</td>
+<td>96</td>
 <td>Medium</td></tr>
 <tr class="b">
-<td>Switch statement found in com.udacity.catpoint.security.service.SecurityService.handleSensorDeactivated() where default case is missing</td>
+<td>Switch statement found in com.udacity.catpoint.security.service.SecurityService.handleSensorDeactivated(boolean) where default case is missing</td>
 <td>STYLE</td>
 <td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#SF_SWITCH_NO_DEFAULT">SF_SWITCH_NO_DEFAULT</a></td>
-<td>105</td>
+<td>114</td>
+<td>Medium</td></tr>
+<tr class="a">
+<td>Unread field: com.udacity.catpoint.security.service.SecurityService.isCatDetected</td>
+<td>PERFORMANCE</td>
+<td><a class="externalLink" href="https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#URF_UNREAD_FIELD">URF_UNREAD_FIELD</a></td>
+<td>27</td>
 <td>Medium</td></tr></table></section>
       </div>
     </div>

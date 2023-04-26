@@ -8,6 +8,7 @@ import com.udacity.catpoint.security.data.SecurityRepository;
 import com.udacity.catpoint.security.data.Sensor;
 
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,8 +19,8 @@ import java.util.Set;
  * This is the class that should contain most of the business logic for our system, and it is the
  * class you will be writing unit tests for.
  */
-public class SecurityService {
 
+public class SecurityService {
     private ImageService imageService;
     private SecurityRepository securityRepository;
     private Set<StatusListener> statusListeners = new HashSet<>();
@@ -53,8 +54,7 @@ public class SecurityService {
      * the camera currently shows a cat.
      * @param cat True if a cat is detected, otherwise false.
      */
-    private void catDetected(Boolean cat) {
-        isCatDetected = cat;
+    private boolean catDetected(Boolean cat) {
         if(cat && getArmingStatus() == ArmingStatus.ARMED_HOME) {
             setAlarmStatus(AlarmStatus.ALARM);
         } else if(!cat && checkAllSensorsStatus(false)) {
@@ -62,6 +62,7 @@ public class SecurityService {
         }
 
         statusListeners.forEach(sl -> sl.catDetected(cat));
+        return cat;
     }
 
     /**
@@ -88,22 +89,33 @@ public class SecurityService {
     /**
      * Internal method for updating the alarm status when a sensor has been activated.
      */
-    private void handleSensorActivated() {
+    private void handleSensorActivated(boolean previousState) {
         if(securityRepository.getArmingStatus() == ArmingStatus.DISARMED) {
             return; //no problem if the system is disarmed
         }
         switch(securityRepository.getAlarmStatus()) {
             case NO_ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
-            case PENDING_ALARM -> setAlarmStatus(AlarmStatus.ALARM);
+            case PENDING_ALARM ->{
+                if(previousState){
+                    setAlarmStatus(AlarmStatus.ALARM);
+                }
+                else if(getArmingStatus() == ArmingStatus.ARMED_HOME || getArmingStatus() == ArmingStatus.ARMED_AWAY)
+                    setAlarmStatus(AlarmStatus.ALARM);
+            }
         }
     }
 
     /**
      * Internal method for updating the alarm status when a sensor has been deactivated
      */
-    private void handleSensorDeactivated() {
+    private void handleSensorDeactivated(boolean previousState) {
+        if(!previousState)
+            return;
         switch(securityRepository.getAlarmStatus()) {
-            case PENDING_ALARM -> setAlarmStatus(AlarmStatus.NO_ALARM);
+            case PENDING_ALARM -> {
+                if(checkAllSensorsStatus(false))
+                    setAlarmStatus(AlarmStatus.NO_ALARM);
+            }
             case ALARM -> setAlarmStatus(AlarmStatus.PENDING_ALARM);
         }
     }
@@ -114,21 +126,19 @@ public class SecurityService {
      * @param active
      */
     public void changeSensorActivationStatus(Sensor sensor, Boolean active) {
-        if(securityRepository.getAlarmStatus() == AlarmStatus.ALARM){
-            if(sensor.getActive()){
-                handleSensorDeactivated();
-            }
-        }
-        else if(securityRepository.getAlarmStatus() != AlarmStatus.ALARM){
-            if(!sensor.getActive() && active) {
-                handleSensorActivated();
-            } else if (sensor.getActive() && !active) {
-                handleSensorDeactivated();
-            }
-        }
-
+        boolean previousState = sensor.getActive();
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);
+
+        if(securityRepository.getAlarmStatus() == AlarmStatus.ALARM){
+            return;
+        }
+        else if(active){
+            handleSensorActivated(previousState);
+        }
+        else{
+            handleSensorDeactivated(previousState);
+        }
     }
 
     private boolean checkAllSensorsStatus(boolean status){
@@ -145,14 +155,14 @@ public class SecurityService {
      * @param currentCameraImage
      */
     public void processImage(BufferedImage currentCameraImage) {
-        catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
+        isCatDetected = catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));
     }
 
     public AlarmStatus getAlarmStatus() {
         return securityRepository.getAlarmStatus();
     }
 
-    public Set<Sensor> getSensors() {
+    public Collection<Sensor> getSensors() {
         return securityRepository.getSensors();
     }
 
@@ -169,7 +179,7 @@ public class SecurityService {
     }
 
     public boolean getIsCatDetected(){
-        return isCatDetected;
+        return securityRepository.isCatDetected();
     }
 
     public void setIsCatDetected(boolean status){

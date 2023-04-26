@@ -18,14 +18,18 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     private Set<Sensor> sensors;
     private AlarmStatus alarmStatus;
     private ArmingStatus armingStatus;
+    private Boolean cat;
 
     //preference keys
     private static final String SENSORS = "SENSORS";
     private static final String ALARM_STATUS = "ALARM_STATUS";
     private static final String ARMING_STATUS = "ARMING_STATUS";
 
+    private static final String CAT_DETECTED = "CAT_DETECTED";
+
     private static final Preferences prefs = Preferences.userNodeForPackage(PretendDatabaseSecurityRepositoryImpl.class);
     private static final Gson gson = new Gson(); //used to serialize objects into JSON
+
 
     public PretendDatabaseSecurityRepositoryImpl() {
         //load system state from prefs, or else default
@@ -76,6 +80,12 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     }
 
     @Override
+    public void setIsCatDetected(Boolean cat){
+        this.cat = cat;
+        prefs.put(CAT_DETECTED, this.cat.toString());
+    }
+
+    @Override
     public Set<Sensor> getSensors() {
         return sensors;
     }
@@ -89,4 +99,7 @@ public class PretendDatabaseSecurityRepositoryImpl implements SecurityRepository
     public ArmingStatus getArmingStatus() {
         return armingStatus;
     }
+
+    @Override
+    public boolean isCatDetected(){ return cat; }
 }
