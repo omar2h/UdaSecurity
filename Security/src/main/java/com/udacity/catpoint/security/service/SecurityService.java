@@ -49,7 +49,7 @@ public class SecurityService {
     private void catDetected(Boolean cat) {
         if(cat && getArmingStatus() == ArmingStatus.ARMED_HOME) {
             setAlarmStatus(AlarmStatus.ALARM);
-        } else {
+        } else if(checkAllSensorsStatus(false)) {
             setAlarmStatus(AlarmStatus.NO_ALARM);
         }
 
@@ -116,6 +116,10 @@ public class SecurityService {
 
         sensor.setActive(active);
         securityRepository.updateSensor(sensor);
+    }
+
+    private boolean checkAllSensorsStatus(boolean status){
+        return getSensors().stream().allMatch(s -> s.getActive() == status);
     }
 
     /**

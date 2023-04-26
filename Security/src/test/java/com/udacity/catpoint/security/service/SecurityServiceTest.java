@@ -132,7 +132,7 @@ class SecurityServiceTest {
         securityService.setArmingStatus(armingStatus);
 
         Set<Sensor> sensors = securityService.getSensors();
-        assertFalse(sensors.stream().anyMatch(Sensor::getActive), "Expected all sensors to be inactive, but some are active.");
+        assertTrue(sensors.stream().allMatch(s -> s.getActive() == false), "Expected all sensors to be inactive, but some are active.");
     }
 
     private static Stream<Arguments> differentArmingStatus() {
