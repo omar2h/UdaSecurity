@@ -1,10 +1,7 @@
 package com.udacity.catpoint.security.service;
 
 import com.udacity.catpoint.image.service.FakeImageService;
-import com.udacity.catpoint.security.data.AlarmStatus;
-import com.udacity.catpoint.security.data.ArmingStatus;
-import com.udacity.catpoint.security.data.SecurityRepository;
-import com.udacity.catpoint.security.data.Sensor;
+import com.udacity.catpoint.security.data.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.awt.image.BufferedImage;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -112,6 +111,7 @@ class SecurityServiceTest {
     @Test
     public void processImage_imageServiceIdentifiesNoCatAndSensorNotActive_changeStatusToNoAlarm() {
         when(imageService.imageContainsCat(any(), ArgumentMatchers.anyFloat())).thenReturn(false);
+        when(securityRepository.getSensors()).thenReturn(Set.of(sensor));
         securityService.processImage(mock(BufferedImage.class));
 
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
@@ -129,17 +129,11 @@ class SecurityServiceTest {
     @ParameterizedTest
     @MethodSource("differentArmingStatus")
     public void setArmingStatus_systemArmed_resetSensors(ArmingStatus armingStatus) {
+        Set<Sensor> sensors = createSensors(3, true);
+        when(securityRepository.getSensors()).thenReturn(sensors);
         securityService.setArmingStatus(armingStatus);
 
-        Set<Sensor> sensors = securityService.getSensors();
         assertTrue(sensors.stream().allMatch(s -> s.getActive() == false), "Expected all sensors to be inactive, but some are active.");
-    }
-
-    private static Stream<Arguments> differentArmingStatus() {
-        return Stream.of(
-                Arguments.of(ArmingStatus.ARMED_AWAY),
-                Arguments.of(ArmingStatus.ARMED_HOME)
-        );
     }
 
     // 11. If the system is armed-home while the camera shows a cat, set the alarm status to alarm.
@@ -151,11 +145,25 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
+    private static Stream<Arguments> differentArmingStatus() {
+        return Stream.of(
+                Arguments.of(ArmingStatus.ARMED_AWAY),
+                Arguments.of(ArmingStatus.ARMED_HOME)
+        );
+    }
+
     private static Stream<Arguments> differentAlarmStatus() {
         return Stream.of(
                 Arguments.of(AlarmStatus.NO_ALARM),
                 Arguments.of(AlarmStatus.PENDING_ALARM),
                 Arguments.of(AlarmStatus.ALARM)
         );
+    }
+
+    private Set<Sensor> createSensors(int count, boolean status){
+        return IntStream.range(0, count)
+                .mapToObj(i -> new Sensor("Sensor " + i, SensorType.DOOR))
+                .peek(sensor -> sensor.setActive(status))
+                .collect(Collectors.toSet());
     }
 }
