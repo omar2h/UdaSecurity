@@ -39,7 +39,7 @@ public class SecurityService {
         if(armingStatus == ArmingStatus.DISARMED) {
             setAlarmStatus(AlarmStatus.NO_ALARM);
         }
-        else if(isCatDetected && armingStatus == ArmingStatus.ARMED_HOME){
+        else if(getIsCatDetected() && armingStatus == ArmingStatus.ARMED_HOME){
             setAlarmStatus(AlarmStatus.ALARM);
         }
         else{
@@ -114,7 +114,12 @@ public class SecurityService {
      * @param active
      */
     public void changeSensorActivationStatus(Sensor sensor, Boolean active) {
-        if(securityRepository.getAlarmStatus() != AlarmStatus.ALARM){
+        if(securityRepository.getAlarmStatus() == AlarmStatus.ALARM){
+            if(sensor.getActive()){
+                handleSensorDeactivated();
+            }
+        }
+        else if(securityRepository.getAlarmStatus() != AlarmStatus.ALARM){
             if(!sensor.getActive() && active) {
                 handleSensorActivated();
             } else if (sensor.getActive() && !active) {
@@ -161,5 +166,13 @@ public class SecurityService {
 
     public ArmingStatus getArmingStatus() {
         return securityRepository.getArmingStatus();
+    }
+
+    public boolean getIsCatDetected(){
+        return isCatDetected;
+    }
+
+    public void setIsCatDetected(boolean status){
+        this.isCatDetected = status;
     }
 }

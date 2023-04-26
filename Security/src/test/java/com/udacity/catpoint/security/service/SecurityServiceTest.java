@@ -145,6 +145,22 @@ class SecurityServiceTest {
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
 
+    // Extra tests to cover all branches
+    @Test
+    public void changeSensorActivationStatus_armedAndSensorActivated_changeToPending(){
+        when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.ALARM);
+        when(sensor.getActive()).thenReturn(true);
+        securityService.changeSensorActivationStatus(sensor, true);
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.PENDING_ALARM);
+    }
+
+    @Test
+    public void setArmingStatus_systemArmedHomeAndCatIdentified_setAlarmStatusToAlarm(){
+        securityService.setIsCatDetected(true);
+        securityService.setArmingStatus(ArmingStatus.ARMED_HOME);
+        verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
+    }
+
     private static Stream<Arguments> differentArmingStatus() {
         return Stream.of(
                 Arguments.of(ArmingStatus.ARMED_AWAY),
